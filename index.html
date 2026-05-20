@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>For Aishee 💗</title>
+  <meta name="description" content="A sweet website dedicated to Aishee, with love notes, a live countdown, and a little map between Dum Dum and Kalyani." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <style>
+    :root {
+      --bg1: #120f1f;
+      --bg2: #1f1633;
+      --card: rgba(255,255,255,0.08);
+      --card-border: rgba(255,255,255,0.12);
+      --text: #f8f4ff;
+      --muted: rgba(248,244,255,0.75);
+      --accent: #ff7ab6;
+      --accent2: #7ee7ff;
+      --shadow: 0 20px 60px rgba(0,0,0,0.35);
+      --radius: 24px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Poppins", system-ui, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(255,122,182,0.22), transparent 28%),
+        radial-gradient(circle at top right, rgba(126,231,255,0.18), transparent 26%),
+        linear-gradient(160deg, var(--bg1), var(--bg2));
+      overflow-x: hidden;
+    }
+
+    .wrap {
+      width: min(1180px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 22px 0 46px;
+    }
+
+    .hero {
+      position: relative;
+      padding: 46px 28px;
+      border: 1px solid var(--card-border);
+      border-radius: 34px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.04));
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      backdrop-filter: blur(14px);
+    }
+
+    .hero::before, .hero::after {
+      content: "";
+      position: absolute;
+      border-radius: 999px;
+      filter: blur(12px);
+      opacity: 0.7;
+      pointer-events: none;
+    }
+    .hero::before {
+      width: 180px; height: 180px;
+      background: rgba(255,122,182,0.16);
+      right: -35px; top: -40px;
+    }
+    .hero::after {
+      width: 140px; height: 140px;
+      background: rgba(126,231,255,0.12);
+      left: -30px; bottom: -30px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.10);
+      color: var(--muted);
+      font-size: 0.94rem;
+    }
+
+    h1, h2 {
+      font-family: "Playfair Display", serif;
+      margin: 0;
+      letter-spacing: 0.3px;
+    }
+
+    h1 {
+      font-size: clamp(2.4rem, 6vw, 4.9rem);
+      margin-top: 18px;
+      line-height: 0.97;
+    }
+
+    .subtitle {
+      max-width: 760px;
+      font-size: clamp(1rem, 2vw, 1.12rem);
+      line-height: 1.75;
+      color: var(--muted);
+      margin-top: 18px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 18px;
+      margin-top: 18px;
+    }
+
+    .card {
+      border: 1px solid var(--card-border);
+      background: var(--card);
+      backdrop-filter: blur(12px);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 22px;
+    }
+
+    .card h2 {
+      font-size: 1.6rem;
+      margin-bottom: 10px;
+    }
+
+    .card p {
+      color: var(--muted);
+      line-height: 1.75;
+      margin: 0;
+    }
+
+    .countdown {
+      grid-column: span 7;
+    }
+
+    .countdown-boxes {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .box {
+      padding: 18px 14px;
+      text-align: center;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.10);
+    }
+
+    .box .num {
+      font-size: clamp(1.6rem, 4vw, 2.3rem);
+      font-weight: 700;
+      display: block;
+      color: #fff;
+    }
+
+    .box .label {
+      font-size: 0.86rem;
+      color: var(--muted);
+      margin-top: 4px;
+      display: block;
+    }
+
+    .milestone {
+      grid-column: span 5;
+    }
+
+    .milestone .big {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 700;
+      margin-top: 8px;
+      line-height: 1;
+      color: #fff;
+    }
+
+    .small-note {
+      margin-top: 12px;
+      font-size: 0.95rem;
+      color: var(--muted);
+    }
+
+    .message {
+      grid-column: span 6;
+    }
+
+    .message p {
+      font-size: 1.03rem;
+    }
+
+    .map-card {
+      grid-column: span 6;
+    }
+
+    #map {
+      height: 430px;
+      border-radius: 18px;
+      overflow: hidden;
+      margin-top: 16px;
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .photo-wall {
+      grid-column: span 12;
+    }
+
+    .photos {
+      margin-top: 16px;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .photo {
+      position: relative;
+      aspect-ratio: 1 / 1;
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.05);
+    }
+
+    .photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.4s ease;
+    }
+
+    .photo:hover img {
+      transform: scale(1.05);
+    }
+
+    .photo .tag {
+      position: absolute;
+      left: 12px;
+      bottom: 12px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(0,0,0,0.35);
+      color: white;
+      font-size: 0.82rem;
+      backdrop-filter: blur(8px);
+    }
+
+    .footer {
+      text-align: center;
+      color: var(--muted);
+      padding: 22px 0 10px;
+      font-size: 0.95rem;
+    }
+
+    .glow {
+      color: #fff;
+      text-shadow: 0 0 24px rgba(255,122,182,0.18);
+    }
+
+    .heart {
+      display: inline-block;
+      transform: translateY(1px);
+    }
+
+    @media (max-width: 960px) {
+      .countdown, .milestone, .message, .map-card, .photo-wall { grid-column: span 12; }
+      .photos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 640px) {
+      .wrap { width: min(100% - 18px, 1180px); }
+      .hero { padding: 26px 18px; border-radius: 26px; }
+      .countdown-boxes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .photos { grid-template-columns: 1fr; }
+      #map { height: 320px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="hero">
+      <div class="eyebrow">For Aishee <span class="heart">💗</span> Made with code, patience, and a suspicious amount of softness</div>
+      <h1>Two cities, one heartbeat.</h1>
+      <p class="subtitle">
+        This little page is a love note in website form. It remembers the distance, counts the days,
+        and keeps your photos shining like tiny stars in a pocket galaxy.
+      </p>
+
+      <div class="grid">
+        <section class="card countdown">
+          <h2>Time until 25 July 2026</h2>
+          <p>Our 1-year milestone, ticking like a tiny drum in the background.</p>
+          <div class="countdown-boxes">
+            <div class="box"><span class="num" id="daysLeft">--</span><span class="label">Days</span></div>
+            <div class="box"><span class="num" id="hoursLeft">--</span><span class="label">Hours</span></div>
+            <div class="box"><span class="num" id="minsLeft">--</span><span class="label">Minutes</span></div>
+            <div class="box"><span class="num" id="secsLeft">--</span><span class="label">Seconds</span></div>
+          </div>
+        </section>
+
+        <section class="card milestone">
+          <h2>Time together</h2>
+          <p>Calculated from the system date, so it updates automatically every time the page opens.</p>
+          <div class="big" id="timeTogether">--</div>
+          <div class="small-note" id="timeTogetherNote">--</div>
+        </section>
+
+        <section class="card message">
+          <h2>Lovely words</h2>
+          <p>
+            Aishee, this page is yours. The photos will be your little museum, the map is the bridge
+            between Dum Dum and Kalyani, and the countdown is the clock that keeps smiling toward 25 July 2026.
+            Keep this page warm with your own words, jokes, memories, and tiny chaos. It will feel alive because
+            it is carrying something real.
+          </p>
+        </section>
+
+        <section class="card map-card">
+          <h2>Distance between Dum Dum and Kalyani</h2>
+          <p>The line on the map shows the straight-line connection. You can keep it like this, or later swap in a driving route.</p>
+          <div id="map"></div>
+          <div class="small-note" id="distanceText"></div>
+        </section>
+
+        <section class="card photo-wall">
+          <h2>Photo gallery</h2>
+          <p>Add your own images inside the <code>photos/</code> folder and replace the file names below. The page will shuffle them like a small memory jukebox.</p>
+          <div class="photos" id="photoGrid"></div>
+        </section>
+      </div>
+    </section>
+
+    <div class="footer">
+      Made for GitHub Pages • No backend needed • Just HTML, CSS, and JS doing a little romantic midfield press ⚽
+    </div>
+  </main>
+
+  <script>
+    // ====== SETTINGS YOU CAN EDIT ======
+    const anniversaryStart = new Date("2025-07-25T00:00:00+05:30");
+    const anniversaryTarget = new Date("2026-07-25T00:00:00+05:30");
+
+    // Approximate town coordinates from Wikipedia:
+    // Dum Dum: 22.6352, 88.4143
+    // Kalyani: 22.97500, 88.43444
+    const dumDum = [22.6352, 88.4143];
+    const kalyani = [22.97500, 88.43444];
+
+    // Replace these with your own filenames in /photos/
+    const photos = [
+      { src: "photos/photo1.jpg", label: "Memory 01" },
+      { src: "photos/photo2.jpg", label: "Memory 02" },
+      { src: "photos/photo3.jpg", label: "Memory 03" },
+      { src: "photos/photo4.jpg", label: "Memory 04" },
+      { src: "photos/photo5.jpg", label: "Memory 05" },
+      { src: "photos/photo6.jpg", label: "Memory 06" }
+    ];
+    // ===================================
+
+    function pad(n) {
+      return String(n).padStart(2, "0");
+    }
+
+    function formatMonthsDays(start, now) {
+      let years = now.getFullYear() - start.getFullYear();
+      let months = now.getMonth() - start.getMonth();
+      let days = now.getDate() - start.getDate();
+
+      if (days < 0) {
+        const prevMonth = new Date(now.getFullYear(), now.getMonth(), 0).getDate();
+        days += prevMonth;
+        months -= 1;
+      }
+      if (months < 0) {
+        months += 12;
+        years -= 1;
+      }
+      const totalMonths = years * 12 + months;
+      return { totalMonths, monthsRemainder: months, years, days };
+    }
+
+    function updateCountdown() {
+      const now = new Date();
+      const diff = anniversaryTarget - now;
+
+      if (diff <= 0) {
+        document.getElementById("daysLeft").textContent = "0";
+        document.getElementById("hoursLeft").textContent = "0";
+        document.getElementById("minsLeft").textContent = "0";
+        document.getElementById("secsLeft").textContent = "0";
+      } else {
+        const totalSeconds = Math.floor(diff / 1000);
+        const days = Math.floor(totalSeconds / 86400);
+        const hours = Math.floor((totalSeconds % 86400) / 3600);
+        const mins = Math.floor((totalSeconds % 3600) / 60);
+        const secs = totalSeconds % 60;
+
+        document.getElementById("daysLeft").textContent = days;
+        document.getElementById("hoursLeft").textContent = pad(hours);
+        document.getElementById("minsLeft").textContent = pad(mins);
+        document.getElementById("secsLeft").textContent = pad(secs);
+      }
+
+      const elapsed = formatMonthsDays(anniversaryStart, now);
+      const months = Math.max(0, elapsed.totalMonths);
+      const days = Math.max(0, elapsed.days);
+      document.getElementById("timeTogether").textContent = `${months} months, ${days} days`;
+      document.getElementById("timeTogetherNote").textContent =
+        `Started on 25 July 2025. Today is ${now.toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })}.`;
+    }
+
+    function haversineKm(a, b) {
+      const R = 6371;
+      const dLat = (b[0] - a[0]) * Math.PI / 180;
+      const dLon = (b[1] - a[1]) * Math.PI / 180;
+      const lat1 = a[0] * Math.PI / 180;
+      const lat2 = b[0] * Math.PI / 180;
+
+      const x =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1) * Math.cos(lat2) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+      return 2 * R * Math.asin(Math.sqrt(x));
+    }
+
+    function initMap() {
+      const map = L.map("map", { scrollWheelZoom: false }).setView([22.805, 88.424], 10);
+
+      L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map);
+
+      const dumMarker = L.marker(dumDum).addTo(map).bindPopup("<b>Dum Dum</b><br>Your side of the map 📍");
+      const kalMarker = L.marker(kalyani).addTo(map).bindPopup("<b>Kalyani</b><br>Your side of the map 📍");
+
+      const line = L.polyline([dumDum, kalyani], {
+        color: "#ff7ab6",
+        weight: 4,
+        opacity: 0.95
+      }).addTo(map);
+
+      map.fitBounds(line.getBounds(), { padding: [30, 30] });
+
+      const distance = haversineKm(dumDum, kalyani);
+      document.getElementById("distanceText").textContent =
+        `Straight-line distance is about ${distance.toFixed(1)} km. (This is an estimate, not a driving route.)`;
+    }
+
+    function renderPhotos() {
+      const grid = document.getElementById("photoGrid");
+      const shuffled = [...photos].sort(() => Math.random() - 0.5);
+
+      grid.innerHTML = shuffled.map((item, index) => `
+        <div class="photo">
+          <img src="${item.src}" alt="${item.label}" onerror="this.src='https://via.placeholder.com/800x800.png?text=Add+Your+Photo'; this.alt='Placeholder image';">
+          <div class="tag">${item.label}</div>
+        </div>
+      `).join("");
+    }
+
+    updateCountdown();
+    initMap();
+    renderPhotos();
+    setInterval(updateCountdown, 1000);
+  </script>
+</body>
+</html>
